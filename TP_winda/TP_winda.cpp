@@ -31,7 +31,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_TPWINDA, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
-
+    GdiplusStartupInput gdiplusStartupInput;
+    ULONG_PTR gdiplusToken;
+    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
     // Wykonaj inicjowanie aplikacji:
     if (!InitInstance (hInstance, nCmdShow))
     {
