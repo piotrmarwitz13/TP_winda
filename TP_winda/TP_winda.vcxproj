@@ -140,9 +140,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="osoba.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TP_winda.h" />
+    <ClInclude Include="winda.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TP_winda.cpp" />

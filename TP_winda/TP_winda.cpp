@@ -3,7 +3,7 @@
 
 #include "framework.h"
 #include "TP_winda.h"
-
+#include "winda.h"
 #define MAX_LOADSTRING 100
 //stałe
 int DLUGOSC_PIETRA = 100;
