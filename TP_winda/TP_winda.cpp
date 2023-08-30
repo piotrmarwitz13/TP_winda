@@ -7,6 +7,8 @@
 #define MAX_LOADSTRING 100
 //stałe
 int DLUGOSC_PIETRA = 100;
+ULONGLONG CZAS = 33;
+const int PRZYCISKI_ID[20]{ 1,2,3,4,10,12,13,14,20,21,23,24,30,31,32,34,40,41,42,43};
 // Zmienne globalne:
 HINSTANCE hInst;                                // bieżące wystąpienie
 WCHAR szTitle[MAX_LOADSTRING];                  // Tekst paska tytułu
@@ -112,7 +114,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Przechowuj dojście wystąpienia w naszej zmiennej globalnej
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
@@ -141,13 +143,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
                NULL);      // Pointer not needed
        }
    }
-   
+   SetTimer(hWnd, 1, CZAS, NULL);
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
    return TRUE;
 }
-
+void request() {
+    return;
+}
 //
 //  FUNKCJA: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -165,6 +169,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
+            for (auto ID : PRZYCISKI_ID) {
+                if (wmId == ID) request();
+            }
             // Analizuj zaznaczenia menu:
             switch (wmId)
             {
@@ -181,13 +188,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Tutaj dodaj kod rysujący używający elementu hdc...
-            Rysunek(hdc);
-            EndPaint(hWnd, &ps);
+        //from https://www.robertelder.ca/doublebuffering/
+        RECT Client_Rect;
+        GetClientRect(hWnd, &Client_Rect);
+        int win_width = Client_Rect.right - Client_Rect.left;
+        int win_height = Client_Rect.bottom + Client_Rect.left;
+        PAINTSTRUCT ps;
+        HDC Memhdc;
+        HDC hdc;
+        HBITMAP Membitmap;
+        hdc = BeginPaint(hWnd, &ps);
+        Memhdc = CreateCompatibleDC(hdc);
+        Membitmap = CreateCompatibleBitmap(hdc, win_width, win_height);
+        SelectObject(Memhdc, Membitmap);
+        //drawing code goes in here
+        FillRect(Memhdc, &Client_Rect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+        Rysunek(Memhdc);
+        BitBlt(hdc, 0, 0, win_width, win_height, Memhdc, 0, 0, SRCCOPY);
+        DeleteObject(Membitmap);
+        DeleteDC(Memhdc);
+        DeleteDC(hdc);
+        EndPaint(hWnd, &ps);
         }
         break;
+    case WM_ERASEBKGND:
+    {
+        return 1;
+    }
+    case WM_TIMER: {
+
+        InvalidateRect(hWnd, NULL, true);
+    }break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
