@@ -2,7 +2,7 @@
 #pragma once
 #include "framework.h"
 #include "osoba.h"
-
+const enum STANY_WINDY { WINDA_IDLE, WINDA_STOP, WINDA_DRZWI, WINDA_RUCH };
 class WINDA {
 private:
 	int y;
@@ -10,7 +10,8 @@ private:
 	int cel;
 	int cala_waga;
 	bool gora;
-
+	int nieaktywnosc;
+	STANY_WINDY stan;
 public:
 	std::vector<int> kolejka;
 	std::vector<OSOBA> osobywwindzie;
@@ -21,10 +22,62 @@ public:
 		this->cel = 0;
 		this->cala_waga = 0;
 		this->gora = true;
+		this->stan = WINDA_IDLE;
+		this->nieaktywnosc = 0;
 	}
-	int getY() {
-		return y;
+	void NastepnaAkcja() {
+		switch (stan) {
+		case WINDA_STOP:
+			StanStop();
+			break;
+		case WINDA_RUCH:
+			StanRuch();
+			break;
+		case WINDA_IDLE:
+			StanIdle();
+			break;
+		}
 	}
+	
+	void StanStop() {
+		if (!kolejka.empty()) {
+			kolejka.erase(kolejka.begin());
+			if (!kolejka.empty()) {
+
+				cel = kolejka.front();
+			}
+			else {
+				stan = WINDA_IDLE;
+			}
+		}
+	}
+	void StanIdle() {
+		if (!kolejka.empty()) {
+			nieaktywnosc = 0;
+			cel = kolejka.front();
+			if (cel == pietro) stan = WINDA_DRZWI;
+			else stan = WINDA_RUCH;
+		}
+		else {
+			nieaktywnosc += 33;
+			if (nieaktywnosc >= 4000 && pietro != 0) {
+				kolejka.push_back(0);
+			}
+		}
+	}
+	void StanRuch(){
+		if (y > (5 - cel) * DLUGOSC_PIETRA) {
+			y -= PREDKOSC;
+		}
+		else if (y < (5 - cel) *DLUGOSC_PIETRA) {
+			y += PREDKOSC;
+		}
+		else {
+			pietro = cel;
+			stan = WINDA_STOP;
+		}
+	}
+
 	void request(int ID) {
 		int punkt_x_bazowy, modyfikator;
 		int pietro = ID / 10;
@@ -38,21 +91,14 @@ public:
 			modyfikator = -1;
 		}
 		this->cel = cel;
+		kolejka.push_back(cel);
 		int x = punkt_x_bazowy + napietrach[pietro].size() * 25 * modyfikator;
 		int y = (5 - pietro) * DLUGOSC_PIETRA - 60;
 
 		OSOBA osoba(x, y, cel);
 		napietrach[pietro].push_back(osoba);
 	}
-	void Wykonaj() {
-		if (y > (5 - cel) * DLUGOSC_PIETRA) {
-			y -= PREDKOSC;
-		}
-		else if (y < (5 - cel) *DLUGOSC_PIETRA) {
-			y += PREDKOSC;
-		}
-		else {
-			pietro = cel;
-		}
+	int getY() {
+		return y;
 	}
 };

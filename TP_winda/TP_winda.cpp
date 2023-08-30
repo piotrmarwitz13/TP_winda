@@ -236,7 +236,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 1;
     }
     case WM_TIMER: {
-        winda.Wykonaj();
+        winda.NastepnaAkcja();
         InvalidateRect(hWnd, NULL, true);
     }break;
     case WM_DESTROY:
