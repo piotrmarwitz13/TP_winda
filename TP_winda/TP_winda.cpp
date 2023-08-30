@@ -5,7 +5,8 @@
 #include "TP_winda.h"
 
 #define MAX_LOADSTRING 100
-
+//stałe
+int DLUGOSC_PIETRA = 100;
 // Zmienne globalne:
 HINSTANCE hInst;                                // bieżące wystąpienie
 WCHAR szTitle[MAX_LOADSTRING];                  // Tekst paska tytułu
@@ -57,6 +58,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
+void Rysunek(HDC hdc) {
+    Graphics graphics(hdc);
+    Pen pen(Color(255, 0, 0, 0), 3);
+    for (int i = 0; i < 5; i++) {
+        if (i % 2) {
+            graphics.DrawLine(&pen, 480, DLUGOSC_PIETRA * (i + 1), 720, DLUGOSC_PIETRA * (i + 1));
+        }
+        else {
+            graphics.DrawLine(&pen, 10, DLUGOSC_PIETRA * (i + 1), 230, DLUGOSC_PIETRA * (i + 1));
+        }
+    }
+}
 
 
 //
@@ -106,7 +119,29 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    {
       return FALSE;
    }
-
+   //kreator przycisków
+   for (int pietro = 0; pietro < 5; pietro++) {
+       for (int cel = 0; cel < 5; cel++) {
+           if (pietro == cel) continue;
+           int x = (pietro % 2 == 0) ? 10: 700;
+           int y = abs(pietro - 4)*100 + abs(cel-4) *20;
+           wchar_t buffer[256];
+           wsprintfW(buffer, L"%d", (cel));
+           HWND hwndButton = CreateWindow(
+               L"BUTTON",  // Predefined class; Unicode assumed 
+               buffer,      // Button text 
+               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+               x,         // x position 
+               y,         // y position 
+               20,        // Button width
+               20,        // Button height
+               hWnd,     // Parent window
+               (HMENU)(pietro*10 + cel),       // pierwsza cyfra pietro, druga cel. 
+               (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+               NULL);      // Pointer not needed
+       }
+   }
+   
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -149,6 +184,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Tutaj dodaj kod rysujący używający elementu hdc...
+            Rysunek(hdc);
             EndPaint(hWnd, &ps);
         }
         break;
