@@ -20,3 +20,7 @@
 
 #pragma comment(lib,"gdiplus.lib")
 using namespace Gdiplus;
+
+//stale
+int DLUGOSC_PIETRA = 100;
+int PREDKOSC = 5;

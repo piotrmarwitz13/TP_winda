@@ -1,5 +1,6 @@
 //Plik zawieraj¹cy klase osoby
 #pragma once
+#include "framework.h"
 const int WAGA = 70;
 class OSOBA {
 private:
@@ -13,5 +14,11 @@ public:
 		this->y = y;
 		this->cel = cel;
 		waga = WAGA;
+	}
+	int GetX() {
+		return x;
+	}
+	int GetY() {
+		return y;
 	}
 };

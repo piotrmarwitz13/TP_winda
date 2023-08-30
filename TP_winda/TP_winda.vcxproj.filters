@@ -51,5 +51,8 @@
     <Image Include="TP_winda.ico">
       <Filter>Pliki zasobów</Filter>
     </Image>
+    <Image Include="..\..\winda1\WindowsProject2\WindowsProject2\person.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
   </ItemGroup>
 </Project>

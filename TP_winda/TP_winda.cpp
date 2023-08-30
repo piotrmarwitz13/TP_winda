@@ -6,8 +6,8 @@
 #include "winda.h"
 #define MAX_LOADSTRING 100
 //stałe
-int DLUGOSC_PIETRA = 100;
-ULONGLONG CZAS = 33;
+
+UINT CZAS = 33;
 const int PRZYCISKI_ID[20]{ 1,2,3,4,10,12,13,14,20,21,23,24,30,31,32,34,40,41,42,43};
 // Zmienne globalne:
 HINSTANCE hInst;                                // bieżące wystąpienie
@@ -72,10 +72,19 @@ void Rysunek(HDC hdc) {
             graphics.DrawLine(&pen, 10, DLUGOSC_PIETRA * (i + 1), 230, DLUGOSC_PIETRA * (i + 1));
         }
     }
-    graphics.DrawLine(&pen, 230, winda.GetY(), 480, winda.GetY());
-    graphics.DrawLine(&pen, 480, winda.GetY() - 80, 480, winda.GetY());
-    graphics.DrawLine(&pen, 230, winda.GetY() - 80, 230, winda.GetY());
-    graphics.DrawLine(&pen, 230, winda.GetY() - 80, 480, winda.GetY() - 80);
+    for (int i = 0; i < 5; i++) {
+        for (auto& osoba : winda.napietrach[i]) {
+            Bitmap PersonImg(L"person.png");
+            Rect PersonSpace(osoba.GetX(), osoba.GetY(), PersonImg.GetWidth() / 2, PersonImg.GetHeight() / 2);
+            graphics.DrawImage(&PersonImg, PersonSpace);
+        }
+    }
+
+
+    graphics.DrawLine(&pen, 230, winda.getY(), 480, winda.getY());
+    graphics.DrawLine(&pen, 480, winda.getY() - 80, 480, winda.getY());
+    graphics.DrawLine(&pen, 230, winda.getY() - 80, 230, winda.getY());
+    graphics.DrawLine(&pen, 230, winda.getY() - 80, 480, winda.getY() - 80);
     //sciany stale
     graphics.DrawLine(&pen, 480, 0, 480, 100);
     graphics.DrawLine(&pen, 480, 200, 480, 300);
@@ -162,9 +171,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    return TRUE;
 }
-void request() {
-    return;
-}
+
 //
 //  FUNKCJA: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -183,7 +190,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             int wmId = LOWORD(wParam);
             for (auto ID : PRZYCISKI_ID) {
-                if (wmId == ID) request();
+                if (wmId == ID) winda.request(ID);
             }
             // Analizuj zaznaczenia menu:
             switch (wmId)
@@ -229,7 +236,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 1;
     }
     case WM_TIMER: {
-
+        winda.Wykonaj();
         InvalidateRect(hWnd, NULL, true);
     }break;
     case WM_DESTROY:

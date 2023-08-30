@@ -153,6 +153,7 @@
     <ResourceCompile Include="TP_winda.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\winda1\WindowsProject2\WindowsProject2\person.png" />
     <Image Include="small.ico" />
     <Image Include="TP_winda.ico" />
   </ItemGroup>
