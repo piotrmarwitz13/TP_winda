@@ -79,7 +79,11 @@ void Rysunek(HDC hdc) {
             graphics.DrawImage(&PersonImg, PersonSpace);
         }
     }
-
+    for (auto& osoba : winda.osobywwindzie) {
+        Bitmap PersonImg(L"person.png");
+        Rect PersonSpace(osoba.GetX(), osoba.GetY(), PersonImg.GetWidth() / 2, PersonImg.GetHeight() / 2);
+        graphics.DrawImage(&PersonImg, PersonSpace);
+    }
 
     graphics.DrawLine(&pen, 230, winda.getY(), 480, winda.getY());
     graphics.DrawLine(&pen, 480, winda.getY() - 80, 480, winda.getY());

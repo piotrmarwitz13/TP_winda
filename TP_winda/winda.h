@@ -37,17 +37,64 @@ public:
 			StanIdle();
 			break;
 		}
+		RuszaniePasazerow();
 	}
 	
 	void StanStop() {
-		if (!kolejka.empty()) {
-			kolejka.erase(kolejka.begin());
-			if (!kolejka.empty()) {
-
-				cel = kolejka.front();
+		//inicjalizator ruchu dla pasazerow wchodz¹cych
+		KierunekPasazerow('s');
+		if (cala_waga >= MAX_WAGA) return;
+		for (int kolejka_osob = 0; kolejka_osob < napietrach[pietro].size(); kolejka_osob++) {
+			OSOBA& osoba = napietrach[pietro][kolejka_osob];
+			if (osoba.GetKierunek() == 's' && osoba.GetStan() == OSOBA_STOP) {
+				if (pietro % 2) {
+					osoba.UstawKierunek('l');
+					osoba.ObierzCel(osoba.GetX() - 200 + osobywwindzie.size() * 10);
+				}
+				else {
+					osoba.UstawKierunek('p');
+					osoba.ObierzCel(osoba.GetX() + 200 - osobywwindzie.size() * 10);
+				}
+				osoba.SetStan(OSOBA_KOLEJKA);
 			}
-			else {
-				stan = WINDA_IDLE;
+			if (osoba.GetStan() == OSOBA_W_WINDZIE) {
+				cala_waga += osoba.GetWaga();
+				kolejka.push_back(osoba.GetCel());
+				osobywwindzie.push_back(osoba);
+			}
+		}
+		//usuwanie osob wchodz¹cych do windy i osob które wysz³y z pietra Erase-Idiom Algorithm
+		napietrach[pietro].erase(std::remove_if(napietrach[pietro].begin(), napietrach[pietro].end(), [](OSOBA const& p) {return p.GetStan() == OSOBA_W_WINDZIE || p.GetStan() == OSOBA_USUN; }), napietrach[pietro].end());
+
+		//osoby wychodzace z windy
+		for (auto& osoba : osobywwindzie) {
+			if (osoba.GetCel() == pietro) {
+				if (pietro % 2) {
+					osoba.UstawKierunek('p');
+					osoba.ObierzCel(720);
+				}
+				else {
+					osoba.UstawKierunek('l');
+					osoba.ObierzCel(0);
+				}
+				cala_waga -= osoba.GetWaga();
+				osoba.SetStan(OSOBA_PO_WINDZIE);
+				napietrach[pietro].push_back(osoba);
+			}
+		}
+		//usuwanie osob wychodzaczych z windy
+		osobywwindzie.erase(std::remove_if(osobywwindzie.begin(), osobywwindzie.end(), [&](OSOBA const& p) {return p.GetStan() == OSOBA_PO_WINDZIE; }), osobywwindzie.end());
+		if (cala_waga >= MAX_WAGA) return;
+		if (napietrach[pietro].empty()) {
+			stan = WINDA_RUCH;
+			if (!kolejka.empty()) {
+				kolejka.erase(kolejka.begin());
+				if (!kolejka.empty()) {
+					cel = kolejka.front();
+				}
+				else {
+					stan = WINDA_IDLE;
+				}
 			}
 		}
 	}
@@ -55,7 +102,7 @@ public:
 		if (!kolejka.empty()) {
 			nieaktywnosc = 0;
 			cel = kolejka.front();
-			if (cel == pietro) stan = WINDA_DRZWI;
+			if (cel == pietro) stan = WINDA_STOP;
 			else stan = WINDA_RUCH;
 		}
 		else {
@@ -68,16 +115,34 @@ public:
 	void StanRuch(){
 		if (y > (5 - cel) * DLUGOSC_PIETRA) {
 			y -= PREDKOSC;
+			KierunekPasazerow('g');
 		}
 		else if (y < (5 - cel) *DLUGOSC_PIETRA) {
 			y += PREDKOSC;
+			KierunekPasazerow('d');
 		}
 		else {
 			pietro = cel;
 			stan = WINDA_STOP;
 		}
 	}
-
+	void RuszaniePasazerow() {
+		for (auto& osoba : osobywwindzie) {
+			if((stan == WINDA_STOP && osoba.GetKierunek() != 'g' && osoba.GetKierunek() != 'd') || stan == WINDA_RUCH){
+				osoba.Ruch();
+			}
+		}
+		for (int i = 0; i < 5; i++) {
+			for (auto& osoba : napietrach[i]) {
+				if (i == pietro && stan == WINDA_STOP) osoba.Ruch();
+			}
+		}
+	}
+	void KierunekPasazerow(char k) {
+		for (auto& osoba : osobywwindzie) {
+			osoba.SetKierunek(k);
+		}
+	}
 	void request(int ID) {
 		int punkt_x_bazowy, modyfikator;
 		int pietro = ID / 10;
@@ -90,8 +155,7 @@ public:
 			punkt_x_bazowy = 175;
 			modyfikator = -1;
 		}
-		this->cel = cel;
-		kolejka.push_back(cel);
+		kolejka.push_back(pietro);
 		int x = punkt_x_bazowy + napietrach[pietro].size() * 25 * modyfikator;
 		int y = (5 - pietro) * DLUGOSC_PIETRA - 60;
 
