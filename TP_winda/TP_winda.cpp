@@ -13,6 +13,7 @@ const int PRZYCISKI_ID[20]{ 1,2,3,4,10,12,13,14,20,21,23,24,30,31,32,34,40,41,42
 HINSTANCE hInst;                                // bieżące wystąpienie
 WCHAR szTitle[MAX_LOADSTRING];                  // Tekst paska tytułu
 WCHAR szWindowClass[MAX_LOADSTRING];            // nazwa klasy okna głównego
+WINDA winda;
 
 // Przekaż dalej deklaracje funkcji dołączone w tym module kodu:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -62,7 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 void Rysunek(HDC hdc) {
     Graphics graphics(hdc);
-    Pen pen(Color(255, 0, 0, 0), 3);
+    Pen pen(Color(255, 0, 0, 0), 4);
     for (int i = 0; i < 5; i++) {
         if (i % 2) {
             graphics.DrawLine(&pen, 480, DLUGOSC_PIETRA * (i + 1), 720, DLUGOSC_PIETRA * (i + 1));
@@ -71,6 +72,18 @@ void Rysunek(HDC hdc) {
             graphics.DrawLine(&pen, 10, DLUGOSC_PIETRA * (i + 1), 230, DLUGOSC_PIETRA * (i + 1));
         }
     }
+    graphics.DrawLine(&pen, 230, winda.GetY(), 480, winda.GetY());
+    graphics.DrawLine(&pen, 480, winda.GetY() - 80, 480, winda.GetY());
+    graphics.DrawLine(&pen, 230, winda.GetY() - 80, 230, winda.GetY());
+    graphics.DrawLine(&pen, 230, winda.GetY() - 80, 480, winda.GetY() - 80);
+    //sciany stale
+    graphics.DrawLine(&pen, 480, 0, 480, 100);
+    graphics.DrawLine(&pen, 480, 200, 480, 300);
+    graphics.DrawLine(&pen, 480, 400, 480, 500);
+
+    graphics.DrawLine(&pen, 230, DLUGOSC_PIETRA, 230, DLUGOSC_PIETRA*2);
+    graphics.DrawLine(&pen, 230, DLUGOSC_PIETRA*3, 230, DLUGOSC_PIETRA*4);
+    graphics.DrawLine(&pen, 228, 500, 483, 500);
 }
 
 
