@@ -86,8 +86,8 @@ void Rysunek(HDC hdc) {
     }
 
     graphics.DrawLine(&pen, 230, winda.getY(), 480, winda.getY());
-    graphics.DrawLine(&pen, 480, winda.getY() - 80, 480, winda.getY());
-    graphics.DrawLine(&pen, 230, winda.getY() - 80, 230, winda.getY());
+    graphics.DrawLine(&pen, 480, winda.getY() - 80, 480, winda.getY() - winda.GetDoorOffset());
+    graphics.DrawLine(&pen, 230, winda.getY() - 80, 230, winda.getY() - winda.GetDoorOffset());
     graphics.DrawLine(&pen, 230, winda.getY() - 80, 480, winda.getY() - 80);
     //sciany stale
     graphics.DrawLine(&pen, 480, 0, 480, 100);

@@ -21,9 +21,7 @@ public:
 		kierunek = 's';
         stan = OSOBA_STOP;
 	}
-    void ObierzCel(int cel_x) {
-        this->cel_x = cel_x;
-    }
+
     void UstawKierunek(char kierunek) {
         this->kierunek = kierunek;
     }
@@ -58,6 +56,7 @@ public:
             break;
         }
     }
+    //FUNKCJE ATRYBUTÓW
     char SetKierunek(char kierunek) {
         this->kierunek = kierunek;
         return kierunek;
@@ -85,4 +84,8 @@ public:
 	int GetY() {
 		return y;
 	}
+    int SetCelX(int cel_x) {
+        this->cel_x = cel_x;
+        return cel_x;
+    }
 };

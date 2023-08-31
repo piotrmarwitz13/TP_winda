@@ -11,6 +11,7 @@ private:
 	int cala_waga;
 	bool gora;
 	int nieaktywnosc;
+	int drzwi;
 	STANY_WINDY stan;
 public:
 	std::vector<int> kolejka;
@@ -24,6 +25,7 @@ public:
 		this->gora = true;
 		this->stan = WINDA_IDLE;
 		this->nieaktywnosc = 0;
+		this->drzwi = 0;
 	}
 	void NastepnaAkcja() {
 		switch (stan) {
@@ -36,10 +38,12 @@ public:
 		case WINDA_IDLE:
 			StanIdle();
 			break;
+		case WINDA_DRZWI:
+			StanDrzwi();
 		}
 		RuszaniePasazerow();
 	}
-	
+	//FUNKCJE STANÓW
 	void StanStop() {
 		//inicjalizator ruchu dla pasazerow wchodz¹cych
 		KierunekPasazerow('s');
@@ -49,11 +53,11 @@ public:
 			if (osoba.GetKierunek() == 's' && osoba.GetStan() == OSOBA_STOP) {
 				if (pietro % 2) {
 					osoba.UstawKierunek('l');
-					osoba.ObierzCel(osoba.GetX() - 200 + osobywwindzie.size() * 10);
+					osoba.SetCelX(osoba.GetX() - 200 + osobywwindzie.size() * 10);
 				}
 				else {
 					osoba.UstawKierunek('p');
-					osoba.ObierzCel(osoba.GetX() + 200 - osobywwindzie.size() * 10);
+					osoba.SetCelX(osoba.GetX() + 200 - osobywwindzie.size() * 10);
 				}
 				osoba.SetStan(OSOBA_KOLEJKA);
 			}
@@ -71,11 +75,11 @@ public:
 			if (osoba.GetCel() == pietro) {
 				if (pietro % 2) {
 					osoba.UstawKierunek('p');
-					osoba.ObierzCel(720);
+					osoba.SetCelX(720);
 				}
 				else {
 					osoba.UstawKierunek('l');
-					osoba.ObierzCel(0);
+					osoba.SetCelX(0);
 				}
 				cala_waga -= osoba.GetWaga();
 				osoba.SetStan(OSOBA_PO_WINDZIE);
@@ -86,23 +90,14 @@ public:
 		osobywwindzie.erase(std::remove_if(osobywwindzie.begin(), osobywwindzie.end(), [&](OSOBA const& p) {return p.GetStan() == OSOBA_PO_WINDZIE; }), osobywwindzie.end());
 		if (cala_waga >= MAX_WAGA) return;
 		if (napietrach[pietro].empty()) {
-			stan = WINDA_RUCH;
-			if (!kolejka.empty()) {
-				kolejka.erase(kolejka.begin());
-				if (!kolejka.empty()) {
-					cel = kolejka.front();
-				}
-				else {
-					stan = WINDA_IDLE;
-				}
-			}
+			stan = WINDA_DRZWI;
 		}
 	}
 	void StanIdle() {
 		if (!kolejka.empty()) {
 			nieaktywnosc = 0;
 			cel = kolejka.front();
-			if (cel == pietro) stan = WINDA_STOP;
+			if (cel == pietro) stan = WINDA_DRZWI;
 			else stan = WINDA_RUCH;
 		}
 		else {
@@ -123,9 +118,43 @@ public:
 		}
 		else {
 			pietro = cel;
-			stan = WINDA_STOP;
+			stan = WINDA_DRZWI;
 		}
 	}
+	void StanDrzwi() {
+		KierunekPasazerow('s');
+		bool check = false;
+		for (auto& osoba : osobywwindzie) {
+			if (osoba.GetCel() == pietro) check = true;
+		}
+		//drzwi sie otwieraja
+		if (!napietrach[pietro].empty() || check) {
+			if (drzwi >= 80) {
+				stan = WINDA_STOP;
+			}
+			else drzwi += PREDKOSC;
+		}
+		else {
+			//drzwi sie zamykaja
+			if (drzwi <= 0) {
+				//KierunekWindy();
+				stan = WINDA_RUCH;
+
+				if (!kolejka.empty()) {
+					kolejka.erase(kolejka.begin());
+					if (!kolejka.empty()) {
+
+						cel = kolejka.front();
+					}
+					else {
+						stan = WINDA_IDLE;
+					}
+				}
+			}
+			else drzwi -= PREDKOSC;
+		}
+	}
+	//FUNKCJE DLA PASAZEROW
 	void RuszaniePasazerow() {
 		for (auto& osoba : osobywwindzie) {
 			if((stan == WINDA_STOP && osoba.GetKierunek() != 'g' && osoba.GetKierunek() != 'd') || stan == WINDA_RUCH){
@@ -143,6 +172,7 @@ public:
 			osoba.SetKierunek(k);
 		}
 	}
+	//FUNKCJE REQUESTÓW
 	void request(int ID) {
 		int punkt_x_bazowy, modyfikator;
 		int pietro = ID / 10;
@@ -162,7 +192,14 @@ public:
 		OSOBA osoba(x, y, cel);
 		napietrach[pietro].push_back(osoba);
 	}
+	//FUNKCJE GET
 	int getY() {
 		return y;
+	}
+	int GetDoorOffset() {
+		return drzwi;
+	}
+	int GetWeight() {
+		return cala_waga;
 	}
 };
