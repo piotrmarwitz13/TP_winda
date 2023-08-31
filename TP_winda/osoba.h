@@ -20,6 +20,7 @@ public:
 		waga = WAGA;
 		kierunek = 's';
         stan = OSOBA_STOP;
+        this->cel_x = x;
 	}
 
     void UstawKierunek(char kierunek) {

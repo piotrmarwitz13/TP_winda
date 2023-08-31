@@ -9,7 +9,7 @@ private:
 	int pietro;
 	int cel;
 	int cala_waga;
-	bool gora;
+	bool kierunek_gora;
 	int nieaktywnosc;
 	int drzwi;
 	STANY_WINDY stan;
@@ -22,7 +22,7 @@ public:
 		this->pietro = 0;
 		this->cel = 0;
 		this->cala_waga = 0;
-		this->gora = true;
+		this->kierunek_gora = true;
 		this->stan = WINDA_IDLE;
 		this->nieaktywnosc = 0;
 		this->drzwi = 0;
@@ -46,9 +46,8 @@ public:
 	//FUNKCJE STANÓW
 	void StanStop() {
 		//inicjalizator ruchu dla pasazerow wchodz¹cych
-		KierunekPasazerow('s');
 		if (cala_waga >= MAX_WAGA) return;
-		for (int kolejka_osob = 0; kolejka_osob < napietrach[pietro].size(); kolejka_osob++) {
+		for (size_t kolejka_osob = 0; kolejka_osob < napietrach[pietro].size(); kolejka_osob++) {
 			OSOBA& osoba = napietrach[pietro][kolejka_osob];
 			if (osoba.GetKierunek() == 's' && osoba.GetStan() == OSOBA_STOP) {
 				if (pietro % 2) {
@@ -63,7 +62,7 @@ public:
 			}
 			if (osoba.GetStan() == OSOBA_W_WINDZIE) {
 				cala_waga += osoba.GetWaga();
-				kolejka.push_back(osoba.GetCel());
+				DodajDoKolejki(osoba.GetCel());
 				osobywwindzie.push_back(osoba);
 			}
 		}
@@ -92,6 +91,7 @@ public:
 		if (napietrach[pietro].empty()) {
 			stan = WINDA_DRZWI;
 		}
+		return;
 	}
 	void StanIdle() {
 		if (!kolejka.empty()) {
@@ -103,7 +103,7 @@ public:
 		else {
 			nieaktywnosc += 33;
 			if (nieaktywnosc >= 4000 && pietro != 0) {
-				kolejka.push_back(0);
+				DodajDoKolejki(0);
 			}
 		}
 	}
@@ -137,7 +137,7 @@ public:
 		else {
 			//drzwi sie zamykaja
 			if (drzwi <= 0) {
-				//KierunekWindy();
+				KierunekWindy();
 				stan = WINDA_RUCH;
 
 				if (!kolejka.empty()) {
@@ -154,7 +154,7 @@ public:
 			else drzwi -= PREDKOSC;
 		}
 	}
-	//FUNKCJE DLA PASAZEROW
+	//FUNKCJE DLA PASAZEROW I KIERUNEK WINDY
 	void RuszaniePasazerow() {
 		for (auto& osoba : osobywwindzie) {
 			if((stan == WINDA_STOP && osoba.GetKierunek() != 'g' && osoba.GetKierunek() != 'd') || stan == WINDA_RUCH){
@@ -172,12 +172,22 @@ public:
 			osoba.SetKierunek(k);
 		}
 	}
+	void KierunekWindy() {
+		if (kierunek_gora) {
+			int max = *max_element(kolejka.begin(), kolejka.end());
+			if (max == pietro) kierunek_gora = false;
+		}
+		else {
+			int min = *min_element(kolejka.begin(), kolejka.end());
+			if (min == pietro) kierunek_gora = true;
+		}
+	}
 	//FUNKCJE REQUESTÓW
 	void request(int ID) {
 		int punkt_x_bazowy, modyfikator;
-		int pietro = ID / 10;
-		int cel = ID % 10;
-		if (pietro % 2) {
+		int reqpietro = ID / 10;
+		int reqcel = ID % 10;
+		if (reqpietro % 2) {
 			punkt_x_bazowy = 475;
 			modyfikator = 1;
 		}
@@ -185,13 +195,69 @@ public:
 			punkt_x_bazowy = 175;
 			modyfikator = -1;
 		}
-		kolejka.push_back(pietro);
-		int x = punkt_x_bazowy + napietrach[pietro].size() * 25 * modyfikator;
-		int y = (5 - pietro) * DLUGOSC_PIETRA - 60;
+		DodajDoKolejki(reqpietro);
+		int x = punkt_x_bazowy + napietrach[reqpietro].size() * 25 * modyfikator;
+		int y = (5 - reqpietro) * DLUGOSC_PIETRA - 60;
 
-		OSOBA osoba(x, y, cel);
-		napietrach[pietro].push_back(osoba);
+		OSOBA osoba(x, y, reqcel);
+		napietrach[reqpietro].push_back(osoba);
 	}
+	void SortujKolejke() {
+		//algorytm SCAN https://www.geeksforgeeks.org/scan-elevator-disk-scheduling-algorithms/
+		std::vector<int> dol, gora;
+		int head = pietro;
+		bool check = false;
+
+		for (auto req : kolejka) {
+			if (req < head)
+				dol.push_back(req);
+			if (req > head)
+				gora.push_back(req);
+			if (req == head) {
+				check = true;
+			}
+		}
+
+		// sorting left and right vectors
+		std::sort(dol.begin(), dol.end());
+		std::sort(gora.begin(), gora.end());
+
+		// run the while loop two times.
+		// one by one scanning right
+		// and left of the head
+		kolejka.clear();
+		int run = 2;
+		while (run--) {
+			if (!kierunek_gora) {
+				for (int i = dol.size() - 1; i >= 0; i--) {
+					int cur_track = dol[i];
+					// appending current track to seek sequence
+					kolejka.push_back(cur_track);
+					// accessed track is now the new head
+					head = cur_track;
+				}
+				kierunek_gora = true;
+			}
+			else if (kierunek_gora) {
+				for (int i = 0; i < gora.size(); i++) {
+					int cur_track = gora[i];
+					// appending current track to seek sequence
+					kolejka.push_back(cur_track);
+					// accessed track is now new head
+					head = cur_track;
+				}
+				kierunek_gora = false;
+			}
+		}
+		//priorytetowy req dla osob na tym samym pietrze co winda
+		if (check) kolejka.insert(kolejka.begin(), pietro);
+
+	}
+	void DodajDoKolejki(int przystanek) {
+		kolejka.push_back(przystanek);
+		SortujKolejke();
+	}
+
 	//FUNKCJE GET
 	int getY() {
 		return y;
