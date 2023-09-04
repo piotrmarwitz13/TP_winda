@@ -41,7 +41,42 @@ public:
 		case WINDA_DRZWI:
 			StanDrzwi();
 		}
+		EwaluacjaPietra();
 		RuszaniePasazerow();
+	}
+	void EwaluacjaPietra() {
+		switch (y) {
+		case 500:
+			pietro = 0;
+			break;
+		case 400:
+			pietro = 1;
+			break;
+		case 300:
+			pietro = 2;
+			break;
+		case 200:
+			pietro = 3;
+			break;
+		case 100:
+			pietro = 4;
+			break;
+		}
+	}
+	void Restart() {
+		this->y = 500;
+		this->pietro = 0;
+		this->cel = 0;
+		this->cala_waga = 0;
+		this->kierunek_gora = true;
+		this->stan = WINDA_IDLE;
+		this->nieaktywnosc = 0;
+		this->drzwi = 0;
+		for (int i = 0; i < 5; i++) {
+			napietrach[i].clear();
+		}
+		kolejka.clear();
+		osobywwindzie.clear();
 	}
 	//FUNKCJE STANÓW
 	void StanStop() {

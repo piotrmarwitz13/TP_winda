@@ -97,6 +97,20 @@ void Rysunek(HDC hdc) {
     graphics.DrawLine(&pen, 230, DLUGOSC_PIETRA, 230, DLUGOSC_PIETRA*2);
     graphics.DrawLine(&pen, 230, DLUGOSC_PIETRA*3, 230, DLUGOSC_PIETRA*4);
     graphics.DrawLine(&pen, 228, 500, 483, 500);
+    //napisy
+    int waga = winda.GetWeight();
+    TextOut(hdc, 500, 10, L"Waga:", 5);
+    wchar_t buffer[256];
+    if (waga == 0) {
+        TextOut(hdc, 545, 10, L"0", 1);
+    }
+    else {
+        wsprintfW(buffer, L"%d", waga);
+        int liczba_cyfr = floor(log10(waga) + 1);
+        TextOut(hdc, 545, 10, buffer, liczba_cyfr);
+    }
+   
+
 }
 
 
@@ -169,6 +183,19 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
                NULL);      // Pointer not needed
        }
    }
+   HWND RestartButton = CreateWindow(
+       L"BUTTON",  // Predefined class; Unicode assumed 
+       L"Restart",      // Button text 
+       WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+       500,         // x position 
+       30,         // y position 
+       60,        // Button width
+       20,        // Button height
+       hWnd,     // Parent window
+       (HMENU)ID_RESTART,       // pierwsza cyfra pietro, druga cel. 
+       (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+       NULL);      // Pointer not needed
+
    SetTimer(hWnd, 1, CZAS, NULL);
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -199,6 +226,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Analizuj zaznaczenia menu:
             switch (wmId)
             {
+            case ID_RESTART:
+                winda.Restart();
+                break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;

@@ -25,3 +25,4 @@ using namespace Gdiplus;
 int DLUGOSC_PIETRA = 100;
 int PREDKOSC = 5;
 const int MAX_WAGA = 600;
+const int ID_RESTART = 100;
