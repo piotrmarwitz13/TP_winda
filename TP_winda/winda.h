@@ -86,11 +86,11 @@ public:
 			OSOBA& osoba = napietrach[pietro][kolejka_osob];
 			if (osoba.GetKierunek() == 's' && osoba.GetStan() == OSOBA_STOP) {
 				if (pietro % 2) {
-					osoba.UstawKierunek('l');
+					osoba.SetKierunek('l');
 					osoba.SetCelX(osoba.GetX() - 200 + osobywwindzie.size() * 10);
 				}
 				else {
-					osoba.UstawKierunek('p');
+					osoba.SetKierunek('p');
 					osoba.SetCelX(osoba.GetX() + 200 - osobywwindzie.size() * 10);
 				}
 				osoba.SetStan(OSOBA_KOLEJKA);
@@ -108,11 +108,11 @@ public:
 		for (auto& osoba : osobywwindzie) {
 			if (osoba.GetCel() == pietro) {
 				if (pietro % 2) {
-					osoba.UstawKierunek('p');
+					osoba.SetKierunek('p');
 					osoba.SetCelX(720);
 				}
 				else {
-					osoba.UstawKierunek('l');
+					osoba.SetKierunek('l');
 					osoba.SetCelX(0);
 				}
 				cala_waga -= osoba.GetWaga();

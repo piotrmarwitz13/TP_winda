@@ -23,9 +23,6 @@ public:
         this->cel_x = x;
 	}
 
-    void UstawKierunek(char kierunek) {
-        this->kierunek = kierunek;
-    }
     void Ruch() {
         switch (kierunek)
         {
