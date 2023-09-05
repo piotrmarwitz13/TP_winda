@@ -143,6 +143,7 @@ public:
 		}
 	}
 	void StanRuch(){
+		if (cel != kolejka.front()) cel = kolejka.front();
 		if (y > (5 - cel) * DLUGOSC_PIETRA) {
 			y -= PREDKOSC;
 			KierunekPasazerow('g');
